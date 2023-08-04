@@ -6,11 +6,9 @@ class UsersController {
   async create(request, response) {
     const { name, email, password } = request.body;
 
-    const checkUserExist = await knex("users").where({ email })
-    
-    const emailFound = checkUserExist[0];
+    const checkUserExist = await knex("users").where({ email }).first();
 
-    if(emailFound){
+    if(checkUserExist){
       throw new AppError("Este email já está sendo usado. Tente outro email.")
     }
 
@@ -25,20 +23,16 @@ class UsersController {
     const { name, email, password, old_password } = request.body;
     const { id } = request.params;
 
-    const findUser = await knex("users").where({ id });
-
-    const user = findUser[0];
+    const user = await knex("users").where({ id }).first();
 
     if (!user) {
       throw new AppError("User não encontrado.");
     }
 
     if (email) {
-      const userWithUpdatedEmail = await knex("users").where({ email });
-  
-      const sameEmailOnDatabase = userWithUpdatedEmail[0];
-  
-      if (sameEmailOnDatabase && sameEmailOnDatabase.id !== user.id) {
+      const userWithUpdatedEmail = await knex("users").where({ email }).first();
+    
+      if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
         throw new AppError("Este email já está sendo usado. Tente outro email.");
       }
     }

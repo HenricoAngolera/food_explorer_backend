@@ -14,8 +14,6 @@ class DishesController{
       user_id
     });
 
-    console.log(dish_id)
-
     const ingredientsInsert = ingredients.map(ingredient => {
       return {
         name: ingredient,
@@ -44,17 +42,19 @@ class DishesController{
     dish.description = description ?? dish.description;
     dish.category = category ?? dish.category;
     
-    // conferir o id do prato ligado aos ingredientes.
+    const ingredientsInsert = ingredients.map(name => {
+      return {
+        dish_id: id,
+        name
+      }
+    })
 
-    // verificar ingredientes apagados.
+    await knex("dishes").where({ id }).update({ image: dish.image, name: dish.name, price: dish.price, description: dish.description, category: dish.category});
 
-    // verificar ingredientes novos incluidos.
+    await knex("ingredients").where({ dish_id: id }).delete();
+    await knex("ingredients").insert(ingredientsInsert);
 
-    // fazer a lista dos ingredientes novos || apagados
-
-    // mandar para o banco de dados.
-
-    return;
+    return response.json();
   }
 
   async show(request, response) {
@@ -68,6 +68,27 @@ class DishesController{
       ...dish,
       ingredients
     });
+  }
+
+  async delete(request, response) {
+    const { id } = request.params;
+
+    await knex("dishes").where({ id }).delete();
+
+    return response.json();
+  } 
+
+  async index(request, response) {
+    const { name, ingredient } = request.query;
+
+    if (name) {
+      return response.json(await knex("dishes").whereLike("name", `%${name}%`))
+    }
+
+    if (ingredient) {
+      return response.json(await knex("ingredients").whereLike("name", `%${ingredient}%`))
+    }
+
   }
 }
 

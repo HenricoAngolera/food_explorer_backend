@@ -82,12 +82,14 @@ class DishesController{
     const { name, ingredient } = request.query;
 
     if (name) {
-      return response.json(await knex("dishes").whereLike("name", `%${name}%`))
+      return response.json(await knex("dishes").whereLike("name", `%${name}%`).orderBy("name"))
     }
 
     if (ingredient) {
-      return response.json(await knex("ingredients").whereLike("name", `%${ingredient}%`))
+      return response.json(await knex("ingredients").whereLike("name", `%${ingredient}%`).orderBy("name"))
     }
+
+    return response.json(await knex("dishes").orderBy("name"))
 
   }
 }

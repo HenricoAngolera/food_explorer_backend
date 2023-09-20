@@ -4,7 +4,7 @@ const DiskStorage = require("../providers/DiskStorage");
 
 class DishImageController {
   async update(request, response) {
-    const { id }  = request.params;
+    const { dish_id }  = request.body;
     const user_id = request.user.id;
     const imageFilename = request.file.filename;
 
@@ -13,10 +13,10 @@ class DishImageController {
     const user = await knex("users").where({ id: user_id }).first();
 
     if(!user) {
-      throw new AppError("Only authenticated admins can change avatar", 401);
+      throw new AppError("Only authenticated admins can change image", 401);
     }
 
-    const dish = await knex("dishes").where({ id, user_id }).first();
+    const dish = await knex("dishes").where({ id: dish_id, user_id }).first();
 
     if(!dish) {
       throw new AppError("Food not found", 404);
@@ -29,7 +29,7 @@ class DishImageController {
     const filename = await diskStorage.save_file(imageFilename);
     dish.image = filename;
 
-    await knex("dishes").update(dish).where({ id });
+    await knex("dishes").update(dish).where({ id: dish_id });
 
     return response.json(dish);
   }

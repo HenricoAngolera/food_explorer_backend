@@ -86,14 +86,19 @@ class DishesController{
       .whereLike('name', `%${name}%`)
       .orderBy('name');
 
-      const dishesByIngredient = await knex('ingredients')
-      .select('dishes.*') // Seleciona todas as colunas da tabela 'dishes'
-      .where('ingredients.name', 'like', `%${name}%`)
-      .innerJoin('dishes', 'dishes.id', 'ingredients.dish_id')
-      .orderBy('dishes.name')
-      .groupBy('dishes.id');
+      if(dishesByName.length == 0) {
+        const dishesByIngredient = await knex('ingredients')
+        .select('dishes.*')
+        .where('ingredients.name', 'like', `%${name}%`)
+        .innerJoin('dishes', 'dishes.id', 'ingredients.dish_id')
+        .orderBy('dishes.name')
+        .groupBy('dishes.id');
 
-      dishes = dishesByName.concat(dishesByIngredient)
+        dishes = dishesByIngredient
+      } else {
+        dishes = dishesByName
+      }
+
     } else {
       dishes = await knex('dishes').orderBy('name')
     };
